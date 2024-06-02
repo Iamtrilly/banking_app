@@ -19,7 +19,7 @@ export default function RootLayout({
             src="/icons/banklogo.svg"
             width={30}
             height={30}
-            alt="menu-icon"
+            alt="logo"
           />
           <div>
             <MobileNav user={loggedIn} />
