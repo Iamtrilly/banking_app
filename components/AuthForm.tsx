@@ -22,8 +22,12 @@ import { Input } from "@/components/ui/input";
 import CustomInput from "./CustomInput";
 import { authFormSchema } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
+import SignIn from "@/app/(auth)/sign-in/page";
+import { useRouter } from "next/navigation";
+import { getLoggedInUser, signIn, signUp } from "@/lib/actions/user.actions";
 
 const AuthForm = ({ type }: { type: string }) => {
+  const router = useRouter();
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -39,13 +43,30 @@ const AuthForm = ({ type }: { type: string }) => {
   });
 
   // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
     setIsLoading(true);
-    console.log(values);
-    setIsLoading(false);
-  }
+
+    try {
+      // Sign Up with Appwrite & create plaid token
+
+      if (type === "sign-up") {
+        const newUser = await signUp(data);
+        setUser(newUser);
+      }
+
+      if (type === "sign-in") {
+        const response = await signIn({
+          email: data.email,
+          password: data.password,
+        });
+        if (response) router.push("/");
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <section className="auth-form">
@@ -111,7 +132,7 @@ const AuthForm = ({ type }: { type: string }) => {
                     <CustomInput
                       control={form.control}
                       name="kraPin"
-                      label="KRA Pin"
+                      label="KRA Pin (Kenya)"
                       placeholder="A01*********"
                     />
                     <CustomInput
@@ -123,9 +144,29 @@ const AuthForm = ({ type }: { type: string }) => {
                   </div>
                   <CustomInput
                     control={form.control}
-                    name="address"
-                    label="Address"
-                    placeholder="Enter your home address"
+                    name="ssn"
+                    label="SSN"
+                    placeholder="SSN"
+                  />
+                  <div className="flex gap-4">
+                    <CustomInput
+                      control={form.control}
+                      name="address"
+                      label="Address"
+                      placeholder="Enter your home address"
+                    />
+                    <CustomInput
+                      control={form.control}
+                      name="postalCode"
+                      label="Postal Code"
+                      placeholder="Enter your post address"
+                    />
+                  </div>
+                  <CustomInput
+                    control={form.control}
+                    name="city"
+                    label="City"
+                    placeholder="City"
                   />
                   <CustomInput
                     control={form.control}
